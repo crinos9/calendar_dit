@@ -1,0 +1,104 @@
+Martin Pinka, D13126650
+URL: -
+
+Usage:
+
+	creating calendar: 
+		URL: http://localhost:5000/
+		HTTP method: GET
+		
+		Returns new returned calendar
+   
+		curl http://localhost:5000/ -X POST
+		{}
+
+
+	new entry:
+		URL: http://localhost:5000/<calendar_id>
+		HTTP method: POST
+    
+		<calendar_id> is numbered from 0
+		Required parameters are "date", "from", "to", "description".
+		Returns created new entry.
+		
+		curl http://localhost:5000/0 -H "Content-type: application/json" -X POST -d '{"date":"14-05-2014", "from":"10:00", "to":"15:00", "description":"meeting"}'
+  
+		{"from": "10:00", "description": "meeting", "to": "15:00", "location": "", "date": "14-05-2014", "repeats": "1"}
+  
+	list of all entries for specific calendar:
+		URL: http://localhost:5000/<calendar_id>
+		HTTP method: GET
+    
+		<calendar_id> is numbered from 0
+		Optional paramets  to choose date range are "from", "to".
+		Returns list of entries.
+    
+		curl http://localhost:5000/0/1 -H "Content-type: application/json" -X GET -d '{"from":"15-05-2014"}'
+		{"1": {"from": "10:00", "description": "meeting", "to": "15:00", "location": "", "date": "14-05-2014", "repeats": "1"}}
+		
+		curl http://localhost:5000/0 -H "Content-type: application/json" -X GET -d '{"from":"15-05-2014","to":"15-05-2014"}'
+		''
+		
+		curl http://localhost:5000/0/1 -H "Content-type: application/json" -X GET -d '{}'
+		{"1": {"from": "10:00", "description": "meeting", "to": "15:00", "location": "", "date": "14-05-2014", "repeats": "1"}}
+		
+	modify entry:
+		URL: http://localhost:5000/<calendar_id>/<entry_id>
+		HTTP method: PUT
+    
+		Entry_id you can obtain from list of calendar's entries.
+		Returns modified entry.
+	
+		curl http://localhost:5000/0/1 -H "Content-type: application/json" -X PUT -d '{"date":"15-05-2014"}'
+		{"from": "10:00", "description": "meeting", "to": "15:00", "location": "", "date": "15-05-2014", "repeats": "1"}
+		
+		curl http://localhost:5000/0/1 -H "Content-type: application/json" -X PUT -d '{"from":"18:00", "to":"22:00"}'
+		{"from": "18:00", "description": "meeting", "to": "22:00", "location": "", "date": "15-05-2014", "repeats": "1"}
+
+	delete entry:
+		URL: http://localhost:5000/<calendar_id>/<entry_id>
+		HTTP method: DELETE
+    
+		Deletes entry  <entry_id> in calendar <calendar_id>.
+		curl http://localhost:5000/0/1 -H "Content-type: application/json" -X DELETE -d '{}'
+	
+	delete calendar:
+		URL: http://localhost:5000/<calendar_id>/<entry_id>
+		HTTP method: DELETE
+    
+		Deletes calendar  calendar <calendar_id>.
+		curl http://localhost:5000/0/1 -H "Content-type: application/json" -X DELETE -d '{}'
+	
+TEST:
+curl http://localhost:5000/0 -H "Content-type: application/json" -X GET -d '{}'
+	{"message": "Calendar 0 doesn't exist"}
+curl http://localhost:5000/ -H "Content-type: application/json" -X POST -d '{}'
+	{}
+
+curl http://localhost:5000/0 -H "Content-type: application/json" -X POST -d '{"from": "04:00", "description": "edinburgh trip", "to": "22:00", "location": "", "date": "20-03-2014", "repeats": "0"}'
+	{"from": "04:00", "description": "edinburgh trip", "to": "22:00", "location": "", "date": "20-03-2014", "repeats": "0"}
+
+curl http://localhost:5000/0 -H "Content-type: application/json" -X POST -d '{"date":"20-03-2014","description":"edinburgh trip", "from":"04:00", "to":"22:00" "repeats": "6"}'
+	{"from": "04:00", "description": "edinburgh trip", "to": "22:00", "location": "", "date": "20-03-2014", "repeats": "6"}
+
+curl http://localhost:5000/0 -H "Content-type: application/json" -X GET -d '{}'
+	{"1": {"from": "04:00", "description": "edinburgh trip", "to": "22:00", "location": "", "date": "20-03-2014", "repeats": "0"},
+	"2": {"from": "04:00", "description": "edinburgh trip", "to": "22:00", "location": "", "date": "21-03-2014", "repeats": "6"}}
+
+curl http://localhost:5000/0/2 -H "Content-type: application/json" -X PUT -d '{"description":"galway"}'
+	{"from": "04:00", "description": "galway", "to": "22:00", "location": "", "date": "21-03-2014", "repeats": "6"}
+	
+curl http://localhost:5000/0 -H "Content-type: application/json" -X GET -d '{"from":"22-03-2014"}'
+	{"2": {"from": "04:00", "description": "galway", "to": "22:00", "location": "", "date": "21-03-2014", "repeats": "6"}}
+
+curl http://localhost:5000/0 -H "Content-type: application/json" -X GET -d '{"to":"22-03-2014"}'
+	{"1": {"from": "04:00", "description": "edinburgh trip", "to": "22:00", "location": "", "date": "20-03-2014", "repeats": "0"},
+	"2": {"from": "04:00", "description": "galway", "to": "22:00", "location": "", "date": "21-03-2014", "repeats": "6"}}
+
+curl http://localhost:5000/0/1 -H "Content-type: application/json" -X DELETE -d '{}'
+curl http://localhost:5000/0 -H "Content-type: application/json" -X GET -d '{"to":"22-03-2014"}'
+	{"2": {"from": "04:00", "description": "galway", "to": "22:00", "location": "", "date": "21-03-2014", "repeats": "6"}}
+
+curl http://localhost:5000/ -H "Content-type: application/json" -X DELETE -d '{}'
+curl http://localhost:5000/0 -H "Content-type: application/json" -X GET -d '{}'
+	{"message": "Calendar 0 doesn't exist"}

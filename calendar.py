@@ -8,17 +8,8 @@ from flask.ext.restful import reqparse, abort, Api, Resource
 app = Flask(__name__)
 api = Api(app)
 
+CALENDARS = [		]
 
-CALENDARS = [	{ 1:	{
-				"date" : "20-01-2014", 
-				"from" : "11:12",
-				"to"   : "13:00",
-				"description" : "blah",
-				"repeats" : "1",
-				"location" : "",
-				}
-			},
-		]
 
 def comapreDates(day1, month1, year1, day2,month2, year2):
 	if year1 == year2:
@@ -132,29 +123,23 @@ class Entry(Resource):
 		del CALENDARS[calendar_id][entry_id]
 		return '', 204
 
- #def put(self, entry_id): #update
-        #args = parser.parse_args()
-        #task = {'task': args['task']}
-        #CALENDARS[entry_id] = task
-        #return task, 201
 
 
-# TodoList
-#   shows a list of all todos, and lets you POST to add new tasks
+
 class Calendar(Resource):
-	def get(self, index): #TODO RANGE
+	def get(self, index):
 		args = rangeParser.parse_args()
 		calendar_exist_check(index)
 		from_date = ''
 		to_date = ''
+		
 		if 'from' in args:
 			if args['from'] is not None:
-				dateFormatCheck(args['from'])
-				from_date = args['from']
-			
+				dateCheck(args['from'])
+				from_date = args['from']	
 		if 'to' in args:
 			if args['to'] is not None:
-				dateFormatCheck(args['to'])
+				dateCheck(args['to'])
 				to_date = args['to']
 		
 		result = {}
@@ -172,7 +157,6 @@ class Calendar(Resource):
 					from_year = int(from_date[-4:])
 				
 				repeats = int(CALENDARS[index][key]['repeats'])
-				
 				this_day = int(CALENDARS[index][key]['date'][:2])
 				
 				for x in range(0, repeats + 1):
@@ -198,6 +182,11 @@ class Calendar(Resource):
 		checkArgs(args)
 		entry_id = len(CALENDARS[index]) + 1
 		CALENDARS[index][entry_id] = args
+		if CALENDARS[index][entry_id]['location'] is None:
+			CALENDARS[index][entry_id]['location'] = ""
+		if CALENDARS[index][entry_id]['repeats'] is None:
+			CALENDARS[index][entry_id]['repeats'] = "0"
+				
 		return CALENDARS[index][entry_id], 201
 	#reinitialization of calendar
 	def delete(self, index):
